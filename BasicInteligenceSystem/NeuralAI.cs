@@ -20,11 +20,18 @@ namespace BasicInteligenceSystem
 
         //Train Information
         private bool Traiable;
+        private int TrainItirenations = 0;
         private float[][] PartialNeuronDerivate;
+        //Total derivative is the cache to change the values until apply training
+        private float[][][] WeightsTotalDerivative;
+        private float[][] BiasTotalDerivative;
+        //User Input
+        public float TrainingRate = 0.01f;
+        public float[] ExpectedOutput { get; private set; }
 
         //User Input
         public float[] Inputs => NeuronsValues[0];
-        public float[] Outpus => NeuronsValues[LayersCount - 1];
+        public float[] Outputs => NeuronsValues[LayersCount - 1];
 
         //Funtion
         public NeuralAI(int[] NeuronCount)
@@ -56,29 +63,42 @@ namespace BasicInteligenceSystem
             }
 
         }
-        public void InitializeTrainingValues()
+        private void InitializeTrainingValues()
         {
-            if (Traiable)
-                return;
             //Maybye we only want the neural network for feed and not training
             Traiable = true;
             //the partial derivative for every neuron
             PartialNeuronDerivate = new float[LayersCount - 1][];
+            ExpectedOutput = new float[NeuronLenght[LayersCount - 1]];
+
+            WeightsTotalDerivative = new float[LayersCount - 1][][];
+            BiasTotalDerivative = new float[LayersCount - 1][];
+
             for (int x = 0; x < LayersCount - 1; x++)
             {
                 PartialNeuronDerivate[x] = new float[NeuronLenght[x + 1]];
+                WeightsTotalDerivative[x] = new float[NeuronLenght[x + 1]][];
+
+                BiasTotalDerivative[x] = new float[NeuronLenght[x + 1]];
+
+                for(int y = 0; y < NeuronLenght[x + 1]; y++)
+                {
+                    WeightsTotalDerivative[x][y] = new float[NeuronLenght[x]];
+
+                }
 
             }
 
         }
 
         //FrontPorpagation
-        public void FrontPropagate(float[] InputValues)
+        public float[] FrontPropagate(float[] InputValues)
         {
             for (int x = 0; x < InputValues.Length; x++)
                 Inputs[x] = InputValues[x];
                 
             FrontPropagate();
+            return Outputs;
 
         }
         public void FrontPropagate()
@@ -95,6 +115,56 @@ namespace BasicInteligenceSystem
                     //For every layer
                     for(int z = 0; z < NeuronLenght[x]; z++)
                     {
+                        //Multiply the last neurn value by the weight connected to it
+                        NeuronsValues[x + 1][y] += Weights[x][y][z];
+
+                    }
+
+                    //Last layer or hidden layer
+                    if(x == LayersCount - 2)
+                        NeuronsValues[x + 1][y] = NeuralMath.Sigmoid(NeuronsValues[x + 1][y]);
+                    else
+                        NeuronsValues[x + 1][y] = NeuralMath.LeakyRelu(NeuronsValues[x + 1][y]);
+
+                }
+
+            }
+
+        }
+
+        //Train with back propagation
+        public void Train()
+        {
+            if (!Traiable) InitializeTrainingValues();
+            TrainItirenations++;
+
+            //Reset Partial Derivatives
+            for (int x = 0; x < LayersCount - 1; x++)
+            {
+                for (int y = 0; y < NeuronLenght[x + 1]; y++)
+                    PartialNeuronDerivate[x][y] = 0;
+            }
+
+            //Calculate the last derivartives
+            for(int y = 0; y < NeuronLenght[LayersCount - 1]; y++)
+                PartialNeuronDerivate[LayersCount - 1][y] = (Outputs[y] - ExpectedOutput[y]) * 2;
+
+            for(int x = LayersCount - 2; x >= 0; x--)
+            {
+                //First calculate the activation funtion derivative
+                for(int y = 0; y < NeuronLenght[x + 1]; y++)
+                {
+                    if(x == LayersCount - 2)
+                        PartialNeuronDerivate[x][y] *= NeuralMath.DLeakyRelu(NeuronsValues[x + 1][y]);
+                    else
+                        PartialNeuronDerivate[x][y] *= NeuralMath.DSigmoid(NeuronsValues[x + 1][y]);
+
+                    BiasTotalDerivative[x][y] += PartialNeuronDerivate[x][y];
+                    for(int z = 0; z < NeuronLenght[x]; z++)
+                    {
+                        WeightsTotalDerivative[x][y][z] += PartialNeuronDerivate[x][y] * NeuronsValues[x][z];
+                        if(x != 0)
+                            PartialNeuronDerivate[x - 1][z] += PartialNeuronDerivate[x][y] * WeightsTotalDerivative[x][y][z];
 
                     }
 
@@ -103,8 +173,44 @@ namespace BasicInteligenceSystem
             }
 
         }
+        public void ApplyTraining()
+        {
+            if (TrainItirenations == 0)
+                return;
 
-        //Aditional Return values
+            for(int x = 0; x < LayersCount - 1; x++)
+            {
+                for(int y = 0; y < NeuronLenght[x + 1]; y++)
+                {
+                    for (int z = 0; z < NeuronLenght[x]; z++)
+                        Weights[x][y][z] -= WeightsTotalDerivative[x][y][z] / (float)TrainItirenations * TrainingRate;
+                    for (int z = 0; z < NeuronLenght[x]; z++)
+                        WeightsTotalDerivative[x][y][z] = 0;
+
+                    Bias[x][y] -= BiasTotalDerivative[x][y] / (float)TrainItirenations * TrainingRate;
+                    BiasTotalDerivative[x][y] = 0;
+                }
+
+            }
+
+            TrainItirenations = 0;
+        }
+        public float AverageError
+        {
+            get
+            {
+                float AverageError = 0;
+                for (int x = 0; x < Outputs.Length; x++)
+                {
+                    float Error = Outputs[x] - ExpectedOutput[x];
+                    AverageError += Error * Error;
+                }
+                return AverageError / (float)Outputs.Length;
+
+            }
+        }
+
+        //Aditional User Values
         public float[][] GetValuesArray() => NeuronsValues;
         public float[][] GetBiasArray() => Bias;
         public float[][][] GetWeightArray() => Weights;
