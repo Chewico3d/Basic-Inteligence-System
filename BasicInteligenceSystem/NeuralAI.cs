@@ -77,7 +77,7 @@ namespace BasicInteligenceSystem
         {
             for (int x = 0; x < InputValues.Length; x++)
                 Inputs[x] = InputValues[x];
-
+                
             FrontPropagate();
 
         }
