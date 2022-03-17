@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BasicInteligenceSystem")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A basic base for a Neural Network")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Chewico")]
 [assembly: AssemblyProduct("BasicInteligenceSystem")]
 [assembly: AssemblyCopyright("Copyright ©  2022")]
 [assembly: AssemblyTrademark("")]

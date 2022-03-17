@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace BasicInteligenceSystem
 {
+    /// <summary>
+    /// The Main Class for the Neural Network
+    /// </summary>
     public class NeuralAI
     {
 
@@ -37,7 +40,7 @@ namespace BasicInteligenceSystem
         public NeuralAI(int[] NeuronCount)
         {
             //Copy the array to avoid editing it
-            NeuronCount.CopyTo(NeuronLenght, 0);
+            NeuronLenght = NeuronCount;
 
             Weights = new float[LayersCount - 1][][];
             NeuronsValues = new float[LayersCount][];
@@ -62,6 +65,19 @@ namespace BasicInteligenceSystem
 
             }
 
+        }
+        public void RanzomitzeValues()
+        {
+            for(int x = 0; x < LayersCount - 1; x++)
+            {
+                for(int y = 0; y < NeuronLenght[x + 1]; y++)
+                {
+                    for (int z = 0; z < NeuronLenght[x]; z++)
+                        Weights[x][y][z] = (float)NeuralMath.Random.NextDouble() * 2 - 1;
+
+                    Bias[x][y] = (float)NeuralMath.Random.NextDouble() * 2 - 1;
+                }
+            }
         }
         private void InitializeTrainingValues()
         {
@@ -92,16 +108,16 @@ namespace BasicInteligenceSystem
         }
 
         //FrontPorpagation
-        public float[] FrontPropagate(float[] InputValues)
+        public float[] FeedFoward(float[] InputValues)
         {
             for (int x = 0; x < InputValues.Length; x++)
                 Inputs[x] = InputValues[x];
                 
-            FrontPropagate();
+            FeedFoward();
             return Outputs;
 
         }
-        public void FrontPropagate()
+        public void FeedFoward()
         {
 
             //For every Layer
@@ -116,7 +132,7 @@ namespace BasicInteligenceSystem
                     for(int z = 0; z < NeuronLenght[x]; z++)
                     {
                         //Multiply the last neurn value by the weight connected to it
-                        NeuronsValues[x + 1][y] += Weights[x][y][z];
+                        NeuronsValues[x + 1][y] += Weights[x][y][z] * NeuronsValues[x][z];
 
                     }
 

@@ -8,6 +8,8 @@ namespace BasicInteligenceSystem
 {
     public static class NeuralMath
     {
+        public static Random Random = new Random(DateTime.Now.Millisecond);
+
         public static float Sigmoid (float Value)
         {
             float DownValue = 1 + (float)Math.Pow(2.71f, -Value);
