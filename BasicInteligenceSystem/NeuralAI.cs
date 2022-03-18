@@ -79,7 +79,7 @@ namespace BasicInteligenceSystem
                 }
             }
         }
-        private void InitializeTrainingValues()
+        public void InitializeTrainingValues()
         {
             //Maybye we only want the neural network for feed and not training
             Traiable = true;
@@ -151,7 +151,7 @@ namespace BasicInteligenceSystem
         //Train with back propagation
         public void Train()
         {
-            if (!Traiable) InitializeTrainingValues();
+            if (!Traiable) throw new ArgumentException("You must initialize training values to train");
             TrainItirenations++;
 
             //Reset Partial Derivatives
