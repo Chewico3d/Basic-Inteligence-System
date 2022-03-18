@@ -151,6 +151,7 @@ namespace BasicInteligenceSystem
         //Train with back propagation
         public void Train()
         {
+
             if (!Traiable) throw new ArgumentException("You must initialize training values to train");
             TrainItirenations++;
 
@@ -162,30 +163,30 @@ namespace BasicInteligenceSystem
             }
 
             //Calculate the last derivartives
-            for(int y = 0; y < NeuronLenght[LayersCount - 1]; y++)
-                PartialNeuronDerivate[LayersCount - 1][y] = (Outputs[y] - ExpectedOutput[y]) * 2;
+            for (int y = 0; y < NeuronLenght[LayersCount - 1]; y++)
+                PartialNeuronDerivate[LayersCount - 2][y] = (Outputs[y] - ExpectedOutput[y]) * 2;
 
-            for(int x = LayersCount - 2; x >= 0; x--)
+            for (int x = LayersCount - 2; x >= 0; x--)
             {
                 //First calculate the activation funtion derivative
                 for(int y = 0; y < NeuronLenght[x + 1]; y++)
                 {
-                    if(x == LayersCount - 2)
-                        PartialNeuronDerivate[x][y] *= NeuralMath.DLeakyRelu(NeuronsValues[x + 1][y]);
-                    else
+                    if(x == LayersCount - 2)//
                         PartialNeuronDerivate[x][y] *= NeuralMath.DSigmoid(NeuronsValues[x + 1][y]);
+                    else
+                        PartialNeuronDerivate[x][y] *= NeuralMath.DLeakyRelu(NeuronsValues[x + 1][y]);
 
                     BiasTotalDerivative[x][y] += PartialNeuronDerivate[x][y];
                     for(int z = 0; z < NeuronLenght[x]; z++)
                     {
                         WeightsTotalDerivative[x][y][z] += PartialNeuronDerivate[x][y] * NeuronsValues[x][z];
+                        
                         if(x != 0)
-                            PartialNeuronDerivate[x - 1][z] += PartialNeuronDerivate[x][y] * WeightsTotalDerivative[x][y][z];
-
+                            PartialNeuronDerivate[x - 1][z] += PartialNeuronDerivate[x][y] * Weights[x][y][z];
+                        
                     }
 
                 }
-
             }
 
         }
@@ -210,6 +211,7 @@ namespace BasicInteligenceSystem
             }
 
             TrainItirenations = 0;
+
         }
         public float AverageError
         {
@@ -221,7 +223,7 @@ namespace BasicInteligenceSystem
                     float Error = Outputs[x] - ExpectedOutput[x];
                     AverageError += Error * Error;
                 }
-                return AverageError / (float)Outputs.Length;
+                return (float)AverageError / (float)Outputs.Length;
 
             }
         }
