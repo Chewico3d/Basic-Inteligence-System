@@ -77,7 +77,7 @@ namespace BasicInteligenceSystem
 
                 }
             }
-            Console.WriteLine(Index + " but " + TotalAmountOfBytes);
+
             Writebyte(255);
 
             return NeuralByteArray;
@@ -110,6 +110,7 @@ namespace BasicInteligenceSystem
                 for(int y = 0; y < NeuronLenght[x + 1]; y++)
                 {
                     Weights[x][y] = new float[NeuronLenght[x]];
+                    Biases[x][y] = ReadFloat();
                     for (int z = 0; z < NeuronLenght[x]; z++)
                         Weights[x][y][z] = ReadFloat();
 
