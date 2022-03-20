@@ -31,6 +31,15 @@ namespace BasicInteligenceSystem
         private static byte[] NeuralByteArray;
         private static int Index;
 
+        public enum Errors
+        {
+            CouldNotReadInitialData,
+            CouldNotReadWeightsAndBias,
+            SomethingFaildInTheEnd,
+            None
+        };
+        public static Errors ErrorGave;
+
         /// <summary>
         /// A simple Funtion to convert the entire neural network to a byte array
         /// </summary>
@@ -48,15 +57,16 @@ namespace BasicInteligenceSystem
             int ByteCountBias = GetByteCountInBias();
             int ByteCountWeights = GetByteCountInWeights();
 
+            int TotalAmountOfBytes = ByteCountGeneral + ByteCountBias * 2 + ByteCountWeights + 2;
 
-            //NeuralByteArray = new byte[TotalAmountOfBytes];
+            NeuralByteArray = new byte[TotalAmountOfBytes];
 
             //General
             WriteInt(Layers);
             for(int x = 0; x < Layers; x++)
                 WriteInt(NeuronLenght[x]);
             
-            Writebyte(255);
+            Writebyte(170);//
 
             //Biases and weights
             for(int x = 0; x < Layers - 1; x++)
@@ -66,12 +76,65 @@ namespace BasicInteligenceSystem
                     WriteFloat(Biases[x][y]);
                     for (int z = 0; z < NeuronLenght[x]; y++)
                         WriteFloat(Weights[x][y][z]);
-                    Writebyte(255);
+                    Writebyte(14);
                 }
             }
             Writebyte(255);
 
             return NeuralByteArray;
+        }
+        public static NeuralAI LoadNeuralNetwork(byte[] ByteArray)
+        {
+            Index = 0;
+
+            Layers = ReadInt();
+            NeuronLenght = new int[Layers];
+
+            for(int x = 0; x < Layers; x++)
+                NeuronLenght[x] = ReadInt();
+
+            if (ReadByte() != 170)
+            {
+                ErrorGave = Errors.CouldNotReadInitialData;
+                return null;
+
+            }
+
+            Biases = new float[Layers - 1][];
+            Weights = new float[Layers - 1][][];
+
+            for(int x = 0; x < Layers - 1; x++)
+            {
+                Biases[x] = new float[NeuronLenght[x + 1]];
+                Weights[x] = new float[NeuronLenght[x + 1]][];
+
+                for(int y = 0; y < NeuronLenght[x + 1]; y++)
+                {
+                    Weights[x][y] = new float[NeuronLenght[x]];
+                    for (int z = 0; z < NeuronLenght[x]; z++)
+                        Weights[x][y][z] = ReadFloat();
+
+                }
+
+                if (ReadByte() != 14)
+                {
+                    ErrorGave = Errors.CouldNotReadInitialData;
+                    return null;
+
+                }
+
+            }
+            if (ReadByte() != 255)
+            {
+                ErrorGave = Errors.SomethingFaildInTheEnd;
+                return null;
+
+            }
+            else
+                ErrorGave = Errors.None;
+
+            return new NeuralAI(NeuronLenght, Biases,Weights);
+            
         }
         /// <summary>
         /// A simple Funtion to convert the bias of the neural network to a byte array
@@ -107,6 +170,46 @@ namespace BasicInteligenceSystem
             NeuralByteArray[Index] = Value;
 
             Index++;
+
+        }
+
+        private static int ReadInt()
+        {
+            byte[] Data = new byte[]
+            {
+                NeuralByteArray[Index + 0],
+                NeuralByteArray[Index + 1],
+                NeuralByteArray[Index + 2],
+                NeuralByteArray[Index + 3]
+            };
+            
+            Index += 4;
+
+            return BitConverter.ToInt32(Data, 0);
+
+        }
+        private static float ReadFloat()
+        {
+            byte[] Data = new byte[]
+            {
+                NeuralByteArray[Index + 0],
+                NeuralByteArray[Index + 1],
+                NeuralByteArray[Index + 2],
+                NeuralByteArray[Index + 3]
+
+            };
+
+            Index += 4;
+            
+            return BitConverter.ToSingle(Data, 0);
+
+        }
+        private static byte ReadByte()
+        {
+            byte Value = NeuralByteArray[Index];
+            Index++;
+
+            return Value;
 
         }
 

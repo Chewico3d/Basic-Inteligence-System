@@ -65,6 +65,49 @@ namespace BasicInteligenceSystem
 
             }
 
+        public NeuralAI(int[] NeuronCount)
+        {
+            //Copy the array to avoid editing it
+            NeuronLenght = NeuronCount;
+
+            Weights = new float[LayersCount - 1][][];
+            NeuronsValues = new float[LayersCount][];
+            Bias = new float[LayersCount - 1][];
+            //For every layer
+            for(int x = 0; x < LayersCount; x++)
+            {
+                NeuronsValues[x] = new float[NeuronLenght[x]];
+
+                //For every layer except the first
+                if (x == 0)
+                    continue;
+
+                //The first layer doesn't have bias and weights
+                Bias[x - 1] = new float[NeuronLenght[x]];
+                Weights[x - 1] = new float[NeuronLenght[x]][];
+                for (int y = 0; y < NeuronLenght[x]; y++)
+                {
+                    Weights[x - 1][y] = new float[NeuronLenght[x - 1]];
+
+                }
+
+            }
+
+        }
+        }
+        public NeuralAI(int[] NeuronCount, float[][] Bias, float[][][] Weights)
+        {
+            //Copy the array to avoid editing it
+            NeuronLenght = NeuronCount;
+
+            this.Weights = Weights;
+            this.NeuronsValues = new float[LayersCount][];
+            this.Bias = Bias;
+
+            //For every layer
+            for (int x = 0; x < LayersCount; x++)
+                NeuronsValues[x] = new float[NeuronLenght[x]];
+
         }
         public void RanzomitzeValues()
         {
@@ -232,6 +275,7 @@ namespace BasicInteligenceSystem
         public float[][] GetValuesArray() => NeuronsValues;
         public float[][] GetBiasArray() => Bias;
         public float[][][] GetWeightArray() => Weights;
+
 
     }
 }
