@@ -47,7 +47,6 @@ namespace BasicInteligenceSystem
         public static byte[] ConvertNeuralToByteArray(NeuralAI Network)
         {
 
-            Console.WriteLine(Network.LayersCount + "lc");
             Layers = Network.LayersCount;
             NeuronLenght = Network.NeuronLenght;
             Biases = Network.GetBiasArray();
@@ -72,18 +71,18 @@ namespace BasicInteligenceSystem
             Writebyte(170);//
 
             //Biases and weights
-            for(int x = 0; x < Layers - 1; x++)
+            for (int x = 0; x < Layers - 1; x++)
             {
                 for(int y = 0; y < NeuronLenght[x + 1]; y++)
                 {
                     WriteFloat(Biases[x][y]);
-                    for (int z = 0; z < NeuronLenght[x]; y++)
+                    for (int z = 0; z < NeuronLenght[x]; z++)
                         WriteFloat(Weights[x][y][z]);
                     Writebyte(14);
 
                 }
             }
-            
+
             Writebyte(255);
 
             return NeuralByteArray;
