@@ -94,6 +94,7 @@ namespace BasicInteligenceSystem
         public static NeuralAI LoadNeuralNetwork(byte[] ByteArray)
         {
             Index = 0;
+            NeuralByteArray = ByteArray;
 
             Layers = ReadInt();
             NeuronLenght = new int[Layers];
