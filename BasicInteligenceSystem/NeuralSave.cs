@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace BasicInteligenceSystem
 {
@@ -82,6 +83,14 @@ namespace BasicInteligenceSystem
 
             return NeuralByteArray;
         }
+        public static byte[] SaveNeuralNetworkIn(NeuralAI Network, string Path)
+        {
+            byte[] NeuralArray = ConvertNeuralToByteArray(Network);
+            File.WriteAllBytes(Path, NeuralArray);
+
+            return NeuralArray;
+
+        }
         public static NeuralAI LoadNeuralNetwork(byte[] ByteArray)
         {
             Index = 0;
@@ -133,7 +142,14 @@ namespace BasicInteligenceSystem
         /// A simple Funtion to convert the bias of the neural network to a byte array
         /// </summary>
         /// <returns></returns>
+        /// 
+        public static NeuralAI LoadNeuralNetwork(string Path)
+        {
+            byte[] Array = File.ReadAllBytes(Path);
 
+            return LoadNeuralNetwork(Array);
+
+        }
         private static void WriteInt(int Value)
         {
             byte[] Data = BitConverter.GetBytes(Value);
