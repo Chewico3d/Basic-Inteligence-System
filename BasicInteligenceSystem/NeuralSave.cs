@@ -54,11 +54,7 @@ namespace BasicInteligenceSystem
 
             Index = 0;
 
-            int ByteCountGeneral = GetByteCountInGeneral();
-            int ByteCountBias = GetByteCountInBias();
-            int ByteCountWeights = GetByteCountInWeights();
-
-            int TotalAmountOfBytes = ByteCountGeneral + ByteCountBias * 2 + ByteCountWeights + 2;
+            int TotalAmountOfBytes = GetByteCountInGeneral() + 2 + GetByteCountInBias() + GetByteCountInWeights();
 
             NeuralByteArray = new byte[TotalAmountOfBytes];
 
@@ -78,11 +74,10 @@ namespace BasicInteligenceSystem
                     WriteFloat(Biases[x][y]);
                     for (int z = 0; z < NeuronLenght[x]; z++)
                         WriteFloat(Weights[x][y][z]);
-                    Writebyte(14);
 
                 }
             }
-
+            Console.WriteLine(Index + " but " + TotalAmountOfBytes);
             Writebyte(255);
 
             return NeuralByteArray;
@@ -117,13 +112,6 @@ namespace BasicInteligenceSystem
                     Weights[x][y] = new float[NeuronLenght[x]];
                     for (int z = 0; z < NeuronLenght[x]; z++)
                         Weights[x][y][z] = ReadFloat();
-
-                }
-
-                if (ReadByte() != 14)
-                {
-                    ErrorGave = Errors.CouldNotReadInitialData;
-                    return null;
 
                 }
 
